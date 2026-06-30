@@ -1,0 +1,30 @@
+name: A股买入信号扫描 (快速)
+
+on:
+  schedule:
+    # 北京时间 8:57 / 10:03 / 14:07 (UTC+8 → UTC)
+    - cron: '57 0 * * 1-5'   # 盘前
+    - cron: '3 2 * * 1-5'    # 开盘
+    - cron: '7 6 * * 1-5'    # 午后
+  workflow_dispatch:          # 手动触发
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run stock screen
+        env:
+          DINGTALK_WEBHOOK: ${{ secrets.DINGTALK_WEBHOOK }}
+          TZ: Asia/Shanghai
+        run: python stock_screen.py
